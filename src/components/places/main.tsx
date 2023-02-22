@@ -1,6 +1,8 @@
 import { COLORS } from "@/constants/css";
+import { tmpState } from "@/recoil/tmp-state";
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 import { dummy } from "./data/dummy";
 import Place from "./place";
 
@@ -11,12 +13,13 @@ interface PlaceProps {
 
 const Main = () => {
   const [placeList, setPlaceList] = useState<PlaceProps[]>([]);
+  const testList = useRecoilValue(tmpState);
 
   useEffect(() => {
-    const data = dummy.places;
+    // const data = dummy.places;
 
-    setPlaceList(data);
-  }, []);
+    setPlaceList(testList);
+  }, [testList]);
 
   return (
     <MainContainer>
