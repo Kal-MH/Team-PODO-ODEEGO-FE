@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "@emotion/styled";
 import Image from "next/image";
 import Header from "@/components/layout/header";
@@ -15,7 +15,51 @@ const LoginPage = () => {
 
   const router = useRouter();
 
-  const handleKakaoLogin = () => {
+  // const handleKakaoLogin = () => {
+  //   if (token) {
+  //     openModal({
+  //       children: "이미 로그인 되어있습니다.",
+  //       btnText: {
+  //         confirm: "로그아웃",
+  //         close: "취소",
+  //       },
+  //       handleConfirm: async () => {
+  //         const logoutToken = getLocalStorage("logoutToken");
+  //         const kakaoLogoutUrl = `/api/kakao-logout`;
+  //         await fetch(kakaoLogoutUrl, {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify({
+  //             logoutToken,
+  //           }),
+  //         });
+
+  //         removeLocalStorage("token");
+  //         removeLocalStorage("logoutToken");
+  //         router.push(`${ROUTES.HOME}`);
+
+  //         // return response;
+  //       },
+  //     });
+  //   } else {
+  //     window.Kakao.Auth.authorize({
+  //       //개인 테스트용 리다이랙션 주소
+  //       // redirectUri: "http://localhost:3000/kakao",
+  //       // 배포 리다이랙션 주소 Production
+  //       redirectUri:
+  //         process.env.NODE_ENV === "development"
+  //           ? "http://localhost:3000/kakao"
+  //           : "https://odeego-private.vercel.app/kakao",
+  //       // 배포 리다이랙션 주소 Preview
+  //       // redirectUri:
+  //       // "https://team-podo-odeego-fe-git-feature-signin-seung-hwan285.vercel.app/kakao",
+  //     });
+  //   }
+  // };
+
+  useEffect(() => {
     if (token) {
       openModal({
         children: "이미 로그인 되어있습니다.",
@@ -43,21 +87,8 @@ const LoginPage = () => {
           // return response;
         },
       });
-    } else {
-      window.Kakao.Auth.authorize({
-        //개인 테스트용 리다이랙션 주소
-        // redirectUri: "http://localhost:3000/kakao",
-        // 배포 리다이랙션 주소 Production
-        redirectUri:
-          process.env.NODE_ENV === "development"
-            ? "http://localhost:3000/kakao"
-            : "https://odeego-private.netlify.app/kakao",
-        // 배포 리다이랙션 주소 Preview
-        // redirectUri:
-        // "https://team-podo-odeego-fe-git-feature-signin-seung-hwan285.vercel.app/kakao",
-      });
     }
-  };
+  }, [token, openModal, router]);
 
   // test
   return (
@@ -65,19 +96,28 @@ const LoginPage = () => {
       <Header />
       <Main text='로그인'>
         <Box>
-          <LoginButton
-            variant='contained'
-            color='kakao'
-            onClick={handleKakaoLogin}
-            aria-label='카카오 로그인'>
-            <Image
-              src='/kakao_login.svg'
-              alt='카카오 로그인'
-              width={20}
-              height={20}
-            />
-            <span>카카오 로그인</span>
-          </LoginButton>
+          <a
+            href={`https://kauth.kakao.com/oauth/authorize?client_id=${
+              process.env.NEXT_PUBLIC_REST_API_KEY
+            }&redirect_uri=${
+              process.env.NODE_ENV === "development"
+                ? process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI_LOCAL
+                : process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI_DEPLOY
+            }&response_type=code`}>
+            <LoginButton
+              variant='contained'
+              color='kakao'
+              aria-label='카카오 로그인'
+              type='button'>
+              <Image
+                src='/kakao_login.svg'
+                alt='카카오 로그인'
+                width={20}
+                height={20}
+              />
+              <span>카카오 로그인</span>
+            </LoginButton>
+          </a>
         </Box>
       </Main>
     </LoginContainer>
