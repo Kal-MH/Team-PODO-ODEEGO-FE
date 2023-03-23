@@ -1,5 +1,4 @@
-import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import SignUpSearchInput from "@/components/signup/signup-search";
 import styled from "@emotion/styled";
 import { COLORS } from "@/constants/css";
@@ -15,25 +14,9 @@ import queryString from "query-string";
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { code: authCode } = context.query;
 
-  const tokenUrl = `https://kauth.kakao.com/oauth/token?${queryString.stringify(
-    {
-      grant_type: "authorization_code",
-      client_id: process.env.NEXT_PUBLIC_REST_API_KEY,
-      redirect_uri: process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI,
-      code: authCode,
-    }
-  )}`;
-
-  const tokenResponse = await fetch(tokenUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  }).then((res) => res.json());
-
-  console.log(tokenResponse.access_token);
-
   return {
     props: {
-      tokenResponse,
+      authCode,
     },
   };
 }
@@ -41,32 +24,46 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 const Kakao = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
-  const router = useRouter();
-  const { code: authCode } = router.query;
+  const [accessToken, setAccessToken] = useState("");
 
   useEffect(() => {
-    const fetchKaokaoUserData = async () => {
+    const fetchKakaoUserData = async () => {
+      const { authCode } = props;
+      const tokenUrl = `https://kauth.kakao.com/oauth/token?${queryString.stringify(
+        {
+          grant_type: "authorization_code",
+          client_id: process.env.NEXT_PUBLIC_REST_API_KEY,
+          redirect_uri: process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI,
+          code: authCode,
+        }
+      )}`;
       try {
-        if (authCode) {
-          setLocalStorage("logoutToken", props.tokenResponse.access_token);
-          if (window.performance && performance.navigation.type !== 1) {
-            const loginBackendUrl = `${process.env.NEXT_PUBLIC_API_END_POINT_ODEEGO}/api/v1/auth/user/me`;
-            const { data } = await axiosInstanceWitToken.post(loginBackendUrl);
-            setLocalStorage("token", data.accessToken);
-          } else {
-            console.error("The page is reloaded");
-          }
+        const tokenResponse = await fetch(tokenUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }).then((res) => res.json());
+
+        setAccessToken(tokenResponse.access_token);
+        setLocalStorage("logoutToken", tokenResponse.access_token);
+
+        if (window.performance && performance.navigation.type !== 1) {
+          const loginBackendUrl = `${process.env.NEXT_PUBLIC_API_END_POINT_ODEEGO}/api/v1/auth/user/me`;
+          const { data } = await axiosInstanceWitToken.post(loginBackendUrl);
+          setLocalStorage("token", data.accessToken);
+        } else {
+          console.error("The page is reloaded");
         }
       } catch (err) {
+        console.error(err);
         throw new Error((err as Error).message);
       }
     };
-    fetchKaokaoUserData();
-  }, [authCode, router]);
+    fetchKakaoUserData();
+  }, []);
 
   return (
     <SignUpContainer>
-      <Header token={props.tokenResponse.access_token} />
+      <Header token={accessToken} />
       <BorderContainer />
       <SignUpTitle>가까운 지하철역을 입력해주세요. ^^</SignUpTitle>
       <SignUpSearchInput />

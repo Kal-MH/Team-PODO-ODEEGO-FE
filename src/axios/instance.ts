@@ -76,7 +76,6 @@ axiosInstanceWitToken.interceptors.request.use(
       config.headers["Authorization"] = "Bearer " + odeegoToken;
       config.headers["Content-Type"] = "application/json";
     } else if (kakaoToken && !odeegoToken) {
-      console.log(kakaoToken);
       config.headers["Authorization"] = "Bearer " + kakaoToken;
     } else {
       config.headers["Authorization"] = "";
