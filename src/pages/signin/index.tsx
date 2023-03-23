@@ -51,7 +51,7 @@ const LoginPage = () => {
         redirectUri:
           process.env.NODE_ENV === "development"
             ? "http://localhost:3000/kakao"
-            : "https://odeego-private.vercel.app/kakao",
+            : "https://odeego-private.netlify.app/kakao",
         // 배포 리다이랙션 주소 Preview
         // redirectUri:
         // "https://team-podo-odeego-fe-git-feature-signin-seung-hwan285.vercel.app/kakao",
