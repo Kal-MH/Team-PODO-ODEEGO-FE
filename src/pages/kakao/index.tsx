@@ -10,35 +10,24 @@ import Header from "@/components/layout/header";
 import { axiosInstanceWitToken } from "@/axios/instance";
 import fetch from "node-fetch";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import queryString from "query-string";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const { NEXT_PUBLIC_URL } = process.env;
-
-  const loginKakao = `/api/kakao-login`;
-
   const { code: authCode } = context.query;
 
-  const responseKakao = await fetch(NEXT_PUBLIC_URL + loginKakao, {
+  const tokenUrl = `https://kauth.kakao.com/oauth/token?${queryString.stringify(
+    {
+      grant_type: "authorization_code",
+      client_id: process.env.NEXT_PUBLIC_REST_API_KEY,
+      redirect_uri: process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI,
+      code: authCode,
+    }
+  )}`;
+
+  const tokenResponse = await fetch(tokenUrl, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ authCode }),
-  });
-
-  const result = await responseKakao.json();
-
-  const { tokenResponse } = result;
-
-  // const loginAuthUrl = `/api/auth/login`;
-
-  // await fetch(NEXT_PUBLIC_URL + loginAuthUrl, {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //   },
-  //   body: JSON.stringify(tokenResponse),
-  // });
+    headers: { "Content-Type": "application/json" },
+  }).then((res) => res.json());
 
   console.log(tokenResponse.access_token);
 

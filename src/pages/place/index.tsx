@@ -9,12 +9,9 @@ import { useIntersectionObserver } from "@/hooks";
 import { PlaceInput, PlaceList, PlaceTabList } from "@/components/place";
 import Image from "next/image";
 import { useCallback } from "react";
-import { PlaceListResponse } from "@/types/api/place";
-import axios from "axios";
 
 interface PageProps {
   stationName: string;
-  places: PlaceListResponse[];
 }
 
 const SIZE = 5;
@@ -27,13 +24,9 @@ export const getServerSideProps = async ({
   query: { stationName: string };
 }) => {
   try {
-    const { data } = await axios(
-      `${process.env.NEXT_PUBLIC_API_END_POINT}/api/v1/places?station-name=${stationName}&page=${FIRST_PAGE_NUM}&size=${SIZE}`
-    );
     return {
       props: {
         stationName,
-        places: data,
       },
     };
   } catch (e) {
@@ -43,7 +36,7 @@ export const getServerSideProps = async ({
   }
 };
 
-const PlacePage = ({ stationName, places }: PageProps) => {
+const PlacePage = ({ stationName }: PageProps) => {
   const tabValue = useRecoilValue(tabState);
 
   const { setTarget } = useIntersectionObserver({
@@ -100,13 +93,10 @@ const PlacePage = ({ stationName, places }: PageProps) => {
             </Box>
           ) : (
             <>
-              {data
-                ? data.pages.map((page, index) => (
-                    <PlaceList key={index} placeList={page.content} />
-                  ))
-                : places.map((p, i) => (
-                    <PlaceList key={i} placeList={p.content} />
-                  ))}
+              {data &&
+                data.pages.map((page, index) => (
+                  <PlaceList key={index} placeList={page.content} />
+                ))}
               {hasNextPage ? (
                 <li
                   style={{
