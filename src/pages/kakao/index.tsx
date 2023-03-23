@@ -8,27 +8,19 @@ import Header from "@/components/layout/header";
 
 import { axiosInstanceWitToken } from "@/axios/instance";
 import fetch from "node-fetch";
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import queryString from "query-string";
+import { useRouter } from "next/router";
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const { code: authCode } = context.query;
-
-  return {
-    props: {
-      authCode,
-    },
-  };
-}
-
-const Kakao = (
-  props: InferGetServerSidePropsType<typeof getServerSideProps>
-) => {
+const Kakao = () => {
   const [accessToken, setAccessToken] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
+    if (!router.isReady) return;
+
     const fetchKakaoUserData = async () => {
-      const { authCode } = props;
+      const { code: authCode } = router.query;
+
       const tokenUrl = `https://kauth.kakao.com/oauth/token?${queryString.stringify(
         {
           grant_type: "authorization_code",
@@ -62,7 +54,7 @@ const Kakao = (
       }
     };
     fetchKakaoUserData();
-  }, []);
+  }, [router]);
 
   return (
     <SignUpContainer>

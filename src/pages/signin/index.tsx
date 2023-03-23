@@ -136,6 +136,10 @@ const Box = styled.div`
   height: 50%;
   flex-direction: column;
   justify-content: center;
+
+  > a {
+    text-decoration: none;
+  }
 `;
 
 const LoginButton = styled(Button)`
