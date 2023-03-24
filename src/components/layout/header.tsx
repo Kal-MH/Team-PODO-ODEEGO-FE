@@ -133,7 +133,9 @@ const Header = ({ token }: TokenProps) => {
           </HeaderIconWrap>
         </>
       )}
+
       <TextP>{HEADER_TEXT}</TextP>
+
       <embed src='/logo1.svg' width={147} height={56} />
     </HeaderContainer>
   );
