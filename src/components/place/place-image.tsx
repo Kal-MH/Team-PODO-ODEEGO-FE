@@ -1,6 +1,7 @@
 import { useLazyLoadImage } from "@/hooks";
 import styled from "@emotion/styled";
 import { SyntheticEvent } from "react";
+import Image from "next/image";
 
 interface PlaceImageProps {
   lazy?: boolean;
@@ -20,12 +21,30 @@ const PlaceImage = ({ lazy, src, alt, placeholder }: PlaceImageProps) => {
   return (
     <>
       <Container>
-        <Image
+        {/* <Image
           ref={imgRef}
           referrerPolicy='no-referrer'
           src={loaded ? (src ? src : placeholder) : placeholder}
           alt={alt}
           draggable={false}
+          onError={handleImageError}
+        /> */}
+        <Image
+          ref={imgRef}
+          src={
+            loaded
+              ? src
+                ? `/api/image-fetcher?url=${encodeURIComponent(src)}`
+                : placeholder
+              : placeholder
+          }
+          alt={alt}
+          width={124}
+          height={124}
+          style={{
+            objectFit: "cover",
+          }}
+          priority
           onError={handleImageError}
         />
       </Container>
@@ -42,12 +61,12 @@ const Container = styled.div`
   border-radius: 1rem;
 `;
 
-const Image = styled.img`
-  width: 12.4rem;
-  height: 12.4rem;
-  object-fit: cover;
+// const Image = styled.img`
+//   width: 12.4rem;
+//   height: 12.4rem;
+//   object-fit: cover;
 
-  &.disabled {
-    display: none;
-  }
-`;
+//   &.disabled {
+//     display: none;
+//   }
+// `;
