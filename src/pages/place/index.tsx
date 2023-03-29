@@ -8,24 +8,46 @@ import { Box, CircularProgress } from "@mui/material";
 import { useIntersectionObserver } from "@/hooks";
 import { PlaceInput, PlaceList, PlaceTabList } from "@/components/place";
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import Paragraph from "@/components/common/skeleton/Paragraph";
+import { useCallback } from "react";
+import axios from "axios";
+import { PlaceListResponse } from "../../types/api/place";
 
 const SIZE = 5;
 const FIRST_PAGE_NUM = 0;
 const USE_QUERY_KEYWORD = "place";
 
-const PlacePage = () => {
-  const tabValue = useRecoilValue(tabState);
-  const router = useRouter();
-  const [stationName, setStationName] = useState("");
+export const getServerSideProps = async ({
+  query: { stationName },
+}: {
+  query: { stationName: string };
+}) => {
+  const { data } = await axios(
+    `${process.env.NEXT_PUBLIC_API_END_POINT_ODEEGO}/api/v1/places?station-name=${stationName}&page=${FIRST_PAGE_NUM}size=${SIZE}`
+  );
 
-  useEffect(() => {
-    if (router.isReady) {
-      setStationName(router.query.stationName as string);
-    }
-  }, [setStationName, router]);
+  return {
+    props: {
+      stationName,
+      places: data,
+    },
+  };
+};
+
+interface PlacePageProps {
+  stationName: string;
+  places: PlaceListResponse;
+}
+
+const PlacePage = ({ stationName, places }: PlacePageProps) => {
+  const tabValue = useRecoilValue(tabState);
+  // const router = useRouter();
+  // const [stationName, setStationName] = useState("");
+
+  // useEffect(() => {
+  //   if (router.isReady) {
+  //     setStationName(router.query.stationName as string);
+  //   }
+  // }, [setStationName, router]);
 
   const { setTarget } = useIntersectionObserver({
     root: null,
@@ -55,6 +77,7 @@ const PlacePage = () => {
     getNextPageParam: (lastPage, allPages) =>
       !lastPage.last ? allPages.length : undefined,
     enabled: stationName !== "",
+    initialData: { pages: [places], pageParams: [undefined] },
   });
 
   return (
@@ -67,23 +90,18 @@ const PlacePage = () => {
       <MainContainer>
         <UnOrderedList>
           {isLoading ? (
-            // <Box
-            //   sx={{
-            //     display: "flex",
-            //     justifyContent: "center",
-            //     alignItems: "center",
-            //     padding: "2rem 0 2.5rem 0",
-            //     position: "absolute",
-            //     top: "50%",
-            //     left: "50%",
-            //     transform: "translate(-50%, -50%)",
-            //   }}>
-            //   <CircularProgress size='5rem' sx={{ color: "#5AB27D" }} />
-            // </Box>
-            <Box>
-              <Paragraph />
-              <Paragraph />
-              <Paragraph />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: "2rem 0 2.5rem 0",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+              }}>
+              <CircularProgress size='5rem' sx={{ color: "#5AB27D" }} />
             </Box>
           ) : (
             <>
